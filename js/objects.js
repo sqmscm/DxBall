@@ -36,7 +36,7 @@ var Ball = function() {
         color: "aquamarine",
         speedX: canvas.width / 40,
         speedY: -canvas.width / 40,
-        speed: canvas.width / 40,
+        speed: canvas.width / 20,
         isFired: false,
     }
     //movements
@@ -81,7 +81,7 @@ var Paddle = function() {
         y: canvas.height - setHeight,
         style: "rect",
         color: "pink",
-        speed: canvas.width / 40,
+        speed: canvas.width / 20,
     }
     //movements
     o.moveLeft = function() {
