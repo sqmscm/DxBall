@@ -84,7 +84,7 @@ var main = function() {
     document.getElementById('fpscont').addEventListener('input', function(event) {
         var data = Number(event.target.value);
         window.fps = data;
-        document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSE";
+        document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSED";
     })
     game.running();
 }

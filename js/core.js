@@ -106,7 +106,7 @@ var Game = function() {
     //Control fps
     var data = Number(document.getElementById('fpscont').value);
     window.fps = data;
-    document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSE";
+    document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSED";
     o.running = function() {
         if (window.fps >= 1) {
             var keys = Object.keys(o.keys);
