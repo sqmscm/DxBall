@@ -20,10 +20,14 @@
     <h2>DX BALL</h2>
     <canvas id="viewer" width="400" height="300"></canvas>
     <br> Speed: <input id="fpscont" type="range" value="30"><br><span id="fpsval">30 FPS</span><br>
-    <button id="prev" onclick="main.prevLevel();">Prev Level</button>&emsp;<button id="next" onclick="main.nextLevel();">Next Level</button>
+    <button id="prev" onclick="main.prevLevel();">Prev Level</button>&emsp;
+    <button id="rest" onclick="main.restLevel();">Restart Level</button>&emsp;
+    <button id="next" onclick="main.nextLevel();">Next Level</button>
     <p>Press [A/D] to move left/right, press [F] to fire the ball.</p>
     <p>Score increases when hits a brick, and decreases when touch the bottom.</p>
 </body>
-<script src="dxball.js" charset="utf-8"></script>
+<script src="js/objects.js" charset="utf-8"></script>
+<script src="js/core.js" charset="utf-8"></script>
+<script src="js/main.js" charset="utf-8"></script>
 
 </html>
