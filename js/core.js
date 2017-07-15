@@ -21,7 +21,9 @@ var Game = function() {
             }
             context.fillRect(item.x, item.y, item.width, item.height);
         } else if (item.style == "circle") {
+            context.beginPath();
             context.arc(item.x, item.y, item.radius, 0, Math.PI * 2, true);
+            context.closePath();
             context.fill();
         }
     }
