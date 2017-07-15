@@ -1,3 +1,3 @@
 # DxBall
-A dxball game using JavaScript.
-Created in HTML   canvas
+<p>A dxball game using JavaScript.</p>
+<p>Created in HTML <code>canvas</code></p>
