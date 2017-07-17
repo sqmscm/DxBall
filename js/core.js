@@ -10,6 +10,7 @@ var Game = function() {
         keys: {},
         callbacks: {},
         fps: 0,
+        collision: 0,
     }
     //draw items
     var canvas = document.getElementById('viewer');
@@ -48,11 +49,9 @@ var Game = function() {
                 o.isInside(ball, brick.x, brick.y + brick.height) ||
                 o.isInside(ball, brick.x + brick.width, brick.y) ||
                 o.isInside(ball, brick.x + brick.width, brick.y + brick.height)) {
-                if (!(Math.abs(ball.y - brick.y - brick.height) <= ball.radius && ball.speedY > 0) &&
-                    !(Math.abs(brick.y - ball.y) <= ball.radius && ball.speedY < 0) &&
-                    !(Math.abs(ball.x - brick.x - brick.width) <= ball.radius && ball.speedX > 0) &&
-                    !(Math.abs(brick.x - ball.x) <= ball.radius && ball.speedX < 0)) {
-                    //log("[collide corner]")
+                //log("[collide corner]")
+                o.collision++; //count the collision times in single render round.
+                if (o.collision <= 1) {
                     ball.speedX *= -1;
                     ball.speedY *= -1;
                 }
@@ -196,6 +195,7 @@ var Game = function() {
             }
             canvas.height = canvas.height; //clear canvas
             o.render();
+            o.collision = 0; //clear the times.
         }
         setTimeout(function() {
             o.running();
