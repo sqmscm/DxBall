@@ -1,13 +1,15 @@
 /*
 JavaScript DxBall
-https://github.com/sqmscm/dxball
+Code: https://github.com/sqmscm/dxball
+Demo: https://sqmscm.github.io/dxball
 */
-//var log = console.log.bind(console);
 //Core functions
+var log = console.log.bind(console); //used to debug
 var Game = function() {
     var o = {
         keys: {},
         callbacks: {},
+        fps: 0,
     }
     //draw items
     var canvas = document.getElementById('viewer');
@@ -39,32 +41,48 @@ var Game = function() {
         })
         o.callbacks[key] = callback;
     }
-
-    //Detect collition
+    //Detect collision
     o.detCol = function(ball, brick) {
         if (ball.isFired) {
-            //log("ball x:"+ball.x+" brick x: "+brick.x+" ball y:"+ball.y+" brick y:"+brick.y+" speedx:"+ball.speedX+" speedY:" + ball.speedY);
-            if (ball.y + ball.radius >= brick.y && ball.y - ball.radius <= brick.y + brick.height) {
-                if (ball.x + ball.radius >= brick.x && ball.x - ball.radius <= brick.x + brick.width) {
-                    if (ball.y >= brick.y && ball.y <= brick.y + brick.height) {
-                        if (ball.x > brick.x + brick.width / 2 && ball.speedX < 0)
-                            ball.speedX *= -1;
-                        else if (ball.x < brick.x + brick.width / 2 && ball.speedX > 0)
-                            ball.speedX *= -1;
-                        //log("[collide y]")
-                    } else if (ball.x >= brick.x && ball.x <= brick.x + brick.width) {
-                        if (ball.y > brick.y && ball.speedY < 0)
-                            ball.speedY *= -1;
-                        else if (ball.y < brick.y + brick.height && ball.speedY > 0)
-                            ball.speedY *= -1;
-                        //log("[collide x]")
-                    } else {
-                        //log("[collide xy]")
-                        ball.speedX *= -1;
-                        ball.speedY *= -1;
-                    }
+            if (o.isInside(ball, brick.x, brick.y) ||
+                o.isInside(ball, brick.x, brick.y + brick.height) ||
+                o.isInside(ball, brick.x + brick.width, brick.y) ||
+                o.isInside(ball, brick.x + brick.width, brick.y + brick.height)) {
+                if (!(Math.abs(ball.y - brick.y - brick.height) <= ball.radius && ball.speedY > 0) &&
+                    !(Math.abs(brick.y - ball.y) <= ball.radius && ball.speedY < 0) &&
+                    !(Math.abs(ball.x - brick.x - brick.width) <= ball.radius && ball.speedX > 0) &&
+                    !(Math.abs(brick.x - ball.x) <= ball.radius && ball.speedX < 0)) {
+                    //log("[collide corner]")
+                    ball.speedX *= -1;
+                    ball.speedY *= -1;
+                }
+                return true;
+            }
+            if (ball.x < brick.x + brick.width && ball.x > brick.x) {
+                if (Math.abs(brick.y - ball.y) <= ball.radius && ball.speedY > 0) {
+                    //log("[collide upper side]")
+                    ball.speedY *= -1;
                     return true;
                 }
+                if (Math.abs(ball.y - brick.y - brick.height) <= ball.radius && ball.speedY < 0) {
+                    //log("[collide lower side]")
+                    ball.speedY *= -1;
+                    return true;
+                }
+                return false;
+            }
+            if (ball.y < brick.y + brick.height && ball.y > brick.y) {
+                if (Math.abs(ball.x - brick.x - brick.width) <= ball.radius && ball.speedX < 0) {
+                    //log("[collide right side]")
+                    ball.speedX *= -1;
+                    return true;
+                }
+                if (Math.abs(brick.x - ball.x) <= ball.radius && ball.speedX > 0) {
+                    //log("[collide left side]")
+                    ball.speedX *= -1;
+                    return true;
+                }
+                return false;
             }
         }
         return false;
@@ -103,12 +121,74 @@ var Game = function() {
         context.font = "10px Courier";
         context.strokeText("Score: " + window.score, 5, canvas.height - 5);
     }
+    //Enable drug
+    o.enableDrag = function(element, mode) {
+        var ofx, ofy;
+        canvas.addEventListener('mousedown', function(event) {
+            if (o.isInside(element, event.offsetX, event.offsetY)) {
+                ofx = event.offsetX - element.x;
+                ofy = event.offsetY - element.y;
+                element.selected = true;
+            } else element.selected = false;
+        });
+        canvas.addEventListener('mousemove', function(event) {
+            if (element.style == "circle") {
+                element.width = element.radius;
+                element.height = element.radius;
+            }
+            if (element.selected) {
+                if ((mode == "horizon" || mode == "plane") &&
+                    event.offsetX - ofx <= canvas.width - element.width &&
+                    event.offsetX - ofx >= 0)
+                    element.x = event.offsetX - ofx;
+                if ((mode == "vertical" || mode == "plane") &&
+                    event.offsetY - ofy <= canvas.height - element.height &&
+                    event.offsetY - ofy >= 0)
+                    element.y = event.offsetY - ofy;
+                if (o.fps < 1) {
+                    canvas.height = canvas.height;
+                    o.render();
+                }
+            }
+        });
+        canvas.addEventListener('mouseup', function(event) {
+            element.selected = false;
+        });
+    }
+    //Enable click
+    o.enableClick = function(element, movement) {
+        canvas.addEventListener('click', function(event) {
+            if (o.isInside(element, event.offsetX, event.offsetY))
+                movement();
+        });
+    }
+    //Check if a point is inside an element
+    o.isInside = function(element, offsetX, offsetY) {
+        if (element.style == "rect" && offsetX >= element.x && offsetX <= element.x + element.width && offsetY >= element.y && offsetY <= element.y + element.height)
+            return true;
+        if (element.style == "circle") {
+            var tempX = offsetX - element.x;
+            var tempY = offsetY - element.y;
+            if (Math.sqrt(tempX * tempX + tempY * tempY) <= element.radius)
+                return true;
+        }
+        return false;
+    }
     //Control fps
-    var data = Number(document.getElementById('fpscont').value);
-    window.fps = data;
-    document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSED";
+    o.updateFPS = function(fps) {
+        var data;
+        if (fps) {
+            data = fps;
+            document.getElementById('fpscont').value = data / 4;
+        } else {
+            data = Number(document.getElementById('fpscont').value) * 4;
+        }
+        o.fps = data;
+        document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSED";
+    }
+    //Running loop
     o.running = function() {
-        if (window.fps >= 1) {
+        if (o.fps >= 1) {
             var keys = Object.keys(o.keys);
             for (var i = 0; i < keys.length; i++) {
                 if (o.keys[keys[i]])
@@ -119,7 +199,7 @@ var Game = function() {
         }
         setTimeout(function() {
             o.running();
-        }, 1000 / window.fps)
+        }, 1000 / o.fps)
     }
 
     return o;

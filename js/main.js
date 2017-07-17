@@ -1,59 +1,54 @@
 /*
 JavaScript DxBall
-https://github.com/sqmscm/dxball
+Code: https://github.com/sqmscm/dxball
+Demo: https://sqmscm.github.io/dxball
 */
-//var log = console.log.bind(console);
 //main
 var main = function() {
     var game = Game();
     var paddle = Paddle();
     var ball = Ball();
     var bricks = game.addBricks();
+    var canvas = document.getElementById('viewer');
     window.score = 0;
     window.win = false;
     window.lose = false;
     //Restart level
     main.restLevel = function() {
+        if (game.fps < 1)
+            game.updateFPS(120);
         game.running = function() {};
         main();
     }
     //Previous level
     main.prevLevel = function() {
-        var canvas = document.getElementById('viewer');
         canvas.width -= 100;
         canvas.height -= 75;
         document.getElementById('next').disabled = false;
         if (canvas.width <= 300) {
             document.getElementById('prev').disabled = true;
         }
-        game.running = function() {};
-        main();
+        main.restLevel();
     }
     //Next level
     main.nextLevel = function() {
-        var canvas = document.getElementById('viewer');
         canvas.width += 100;
         canvas.height += 75;
         document.getElementById('prev').disabled = false;
         if (canvas.width >= 1000) {
             document.getElementById('next').disabled = true;
         }
-        game.running = function() {};
-        main();
+        main.restLevel();
     }
     //reg callbacks
-    game.registerCallback('a', function() {
-        paddle.moveLeft();
-        ball.moveLeft();
-    });
-    game.registerCallback('d', function() {
-        paddle.moveRight();
-        ball.moveRight();
-    });
+    game.registerCallback('a', paddle.moveLeft);
+    game.registerCallback('d', paddle.moveRight);
     game.registerCallback('f', ball.fire);
     //render
     game.render = function() {
         ball.move();
+        if (!ball.isFired)
+            ball.x = paddle.x + paddle.width / 2;
         game.detCol(ball, paddle);
         game.draw(paddle);
         game.draw(ball);
@@ -64,7 +59,7 @@ var main = function() {
                 aliveCounter++;
                 if (game.detCol(ball, bricks[i])) {
                     bricks[i].isAlive = false;
-                    window.score += window.fps;
+                    window.score += game.fps;
                 }
                 game.draw(bricks[i]);
             }
@@ -82,10 +77,14 @@ var main = function() {
     }
     //update fps
     document.getElementById('fpscont').addEventListener('input', function(event) {
-        var data = Number(event.target.value);
-        window.fps = data;
-        document.getElementById('fpsval').innerHTML = data > 0 ? data + " FPS" : "PAUSED";
-    })
+        game.updateFPS();
+    });
+    //Enable mouse movements
+    //game.enableDrag(ball, "plane"); //used to debug
+    game.enableDrag(paddle, "horizon");
+    game.enableClick(ball, ball.fire);
+    //Start running
+    game.updateFPS();
     game.running();
 }
 main();

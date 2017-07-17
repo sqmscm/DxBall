@@ -1,8 +1,8 @@
 /*
 JavaScript DxBall
-https://github.com/sqmscm/dxball
+Code: https://github.com/sqmscm/dxball
+Demo: https://sqmscm.github.io/dxball
 */
-//var log = console.log.bind(console);
 //Brick
 var Brick = function(setX, setY) {
     //Set properties
@@ -34,22 +34,11 @@ var Ball = function() {
         y: canvas.height - setRadius - 20,
         style: "circle",
         color: "aquamarine",
-        speedX: canvas.width / 40,
-        speedY: -canvas.width / 40,
-        speed: canvas.width / 20,
+        speedX: 1,
+        speedY: -1,
         isFired: false,
     }
     //movements
-    o.moveLeft = function() {
-        if (!o.isFired)
-            if (o.x >= o.speed + 50)
-                o.x -= o.speed;
-    }
-    o.moveRight = function() {
-        if (!o.isFired)
-            if (o.x <= canvas.width - o.speed - 50)
-                o.x += o.speed;
-    }
     o.move = function() {
         if (o.isFired) {
             if (o.x <= o.radius || o.x >= canvas.width - o.radius)
@@ -57,7 +46,7 @@ var Ball = function() {
             if (o.y <= o.radius || o.y >= canvas.height - o.radius)
                 o.speedY *= -1;
             if (o.y >= canvas.height - o.radius && !window.win)
-                window.score -= 5 * window.fps;
+                window.score -= 5 * Number(document.getElementById('fpsval').innerHTML.split(' ')[0]);
             o.x += o.speedX;
             o.y += o.speedY;
         }
@@ -81,7 +70,7 @@ var Paddle = function() {
         y: canvas.height - setHeight,
         style: "rect",
         color: "pink",
-        speed: canvas.width / 20,
+        speed: canvas.width / 100,
     }
     //movements
     o.moveLeft = function() {
